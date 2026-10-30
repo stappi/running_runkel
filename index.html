@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#2b1d10">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Running Runkel</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="stage">
+    <canvas id="game" aria-label="Running Runkel Spielfläche"></canvas>
+
+    <div id="topbar" class="hidden">
+      <button id="btn-sound-top" class="round" aria-label="Ton umschalten">♪</button>
+      <button id="btn-pause" class="round" aria-label="Pause">❚❚</button>
+    </div>
+
+    <div id="touch" class="hidden">
+      <div class="pad left">
+        <button id="btn-left" data-act="left" aria-label="Nach links">◀</button>
+        <button id="btn-right" data-act="right" aria-label="Nach rechts">▶</button>
+      </div>
+      <div class="pad right">
+        <button id="btn-duck" data-act="down" aria-label="Ducken">▼</button>
+        <button id="btn-jump" data-act="jump" aria-label="Springen">▲</button>
+      </div>
+    </div>
+
+    <section id="screen-title" class="screen">
+      <div class="title-col">
+        <img class="wappen small" src="assets/sprites/wappen.png" alt="Wappen von Hardinghausen">
+        <h1>Running<br>Runkel</h1>
+        <p class="tag">Lauf, Runkel, lauf! Die Knüppel fliegen schon.</p>
+        <div class="buttons">
+          <button id="btn-play" class="primary">Spielen</button>
+          <button id="btn-sound" class="secondary">Ton: an</button>
+        </div>
+        <div id="level-select" class="levels"></div>
+        <p class="help desk">Laufen: ← → oder A D · Springen: Leertaste · Ducken: ↓ oder S · Pause: P · Ton: M</p>
+      </div>
+    </section>
+
+    <section id="screen-pause" class="screen dim hidden">
+      <div class="card">
+        <h2>Pause</h2>
+        <div class="buttons column">
+          <button id="btn-resume" class="primary">Weiter</button>
+          <button id="btn-sound-pause" class="secondary">Ton: an</button>
+          <button id="btn-restart" class="secondary">Level neu starten</button>
+          <button id="btn-quit" class="secondary">Zum Titel</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-gameover" class="screen dim hidden">
+      <div class="card">
+        <h2>Autsch!</h2>
+        <p>Die Runkel ist reif für die Reha.</p>
+        <div class="buttons column">
+          <button id="btn-retry" class="primary">Nochmal versuchen</button>
+          <button id="btn-quit2" class="secondary">Zum Titel</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-level" class="screen dim hidden">
+      <div class="card">
+        <h2 id="level-title">Geschafft!</h2>
+        <p id="level-stats"></p>
+        <div class="buttons column">
+          <button id="btn-next" class="primary">Weiter</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-credits" class="screen dim hidden">
+      <div class="card wide">
+        <img class="wappen" src="assets/sprites/wappen.png" alt="Wappen von Hardinghausen">
+        <div>
+          <h2>Entkommen!</h2>
+          <p>Die Runkel ist heil zu Hause. Die Knüppel haben das Nachsehen.</p>
+          <p id="credits-stats"></p>
+          <div class="buttons column">
+            <button id="btn-credits-back" class="primary">Zum Titel</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-loading" class="screen dim">
+      <div class="card"><h2>Runkel wird geerntet …</h2></div>
+    </section>
+  </div>
+
+  <div id="rotate" class="hidden">
+    <div class="phone">📱</div>
+    <p>Bitte Gerät drehen</p>
+  </div>
+
+  <script src="js/sprite-data.js"></script>
+  <script src="js/assets.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/physics.js"></script>
+  <script src="js/runkel-rig.js"></script>
+  <script src="js/levels.js"></script>
+  <script src="js/level.js"></script>
+  <script src="js/entities.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/hud.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

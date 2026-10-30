@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="540" viewBox="0 0 1920 540"><path fill="#a9cf7b" d="M0 330c160-70 320-90 480-40s300 60 480 0 330-70 480-20 320 20 480 60v210H0z"/>
+<path fill="#8fbe5e" d="M0 380c200-40 330-60 520-20s330 40 500-10 340-60 500-10 280 40 400 40v160H0z"/>
+<g fill="none" stroke="#7fae50" stroke-width="3"><path d="M210 365c90-20 170-18 260 4M260 392c80-16 150-14 240 6M1190 352c80-16 170-14 250 8M1240 378c70-12 150-10 240 8"/></g>
+<path fill="#d9c56a" d="M620 400c60-24 170-34 250-8l-30 40H640zM1540 396c70-24 150-28 220-6l-20 44h-180z"/>
+<g fill="none" stroke="#bda84f" stroke-width="3"><path d="M650 414c60-14 130-20 190-8M1570 410c50-12 120-14 170-6"/></g>
+<g fill="#74a44a"><ellipse cx="120" cy="352" rx="46" ry="24"/><ellipse cx="880" cy="342" rx="56" ry="26"/><ellipse cx="1110" cy="372" rx="44" ry="22"/><ellipse cx="1810" cy="372" rx="56" ry="26"/></g></svg>
