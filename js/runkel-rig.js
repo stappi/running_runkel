@@ -36,14 +36,18 @@ RR.Rig = (function () {
     ctx.restore();
   }
 
-  function hand(ctx, x, y, ang) {
+  // Die Hand ist wie in den Vorlagen ein hohles Oval, das am Armende ansetzt.
+  function arm(ctx, x0, y0, x1, y1, bend) {
+    limb(ctx, x0, y0, x1, y1, bend);
+    const dx = x1 - x0, dy = y1 - y0;
+    const len = Math.hypot(dx, dy) || 1;
+    const cx = (x0 + x1) / 2 - dy / len * bend, cy = (y0 + y1) / 2 + dx / len * bend;
+    const ang = Math.atan2(y1 - cy, x1 - cx);
     ctx.save();
-    ctx.translate(x, y);
+    ctx.translate(x1 + Math.cos(ang) * 32, y1 + Math.sin(ang) * 32);
     ctx.rotate(ang);
     ctx.beginPath();
     ctx.ellipse(0, 0, 32, 18, 0, 0, Math.PI * 2);
-    ctx.fillStyle = '#fff';
-    ctx.fill();
     ctx.lineWidth = 9;
     ctx.strokeStyle = '#000';
     ctx.stroke();
@@ -97,16 +101,16 @@ RR.Rig = (function () {
 
     if (s.duck) {
       feet.push([hipA[0] - 80, hipA[1] + L, 0], [hipB[0] + 50, hipB[1] + L + 40, 0]);
-      hands.push([armA[0] - 170, armA[1] + 150, 0.4], [armB[0] + 180, armB[1] + 240, -0.4]);
+      hands.push([armA[0] - 170, armA[1] + 150], [armB[0] + 180, armB[1] + 240]);
     } else if (air) {
       const rising = s.vy < 80;
       if (rising) {
         feet.push([hipA[0] - 150, hipA[1] + 190, -0.5], [hipB[0] + 110, hipB[1] + 170, 0.5]);
-        hands.push([armA[0] - 200, armA[1] - 210, -0.8], [armB[0] + 150, armB[1] - 300, 0.8]);
+        hands.push([armA[0] - 200, armA[1] - 210], [armB[0] + 150, armB[1] - 300]);
       } else {
         const w = Math.sin(s.t * 26) * 26;
         feet.push([hipA[0] - 70, hipA[1] + 285, -0.25], [hipB[0] + 95, hipB[1] + 265, 0.25]);
-        hands.push([armA[0] - 230, armA[1] - 170 + w, -0.6], [armB[0] + 190, armB[1] - 250 - w, 0.6]);
+        hands.push([armA[0] - 230, armA[1] - 170 + w], [armB[0] + 190, armB[1] - 250 - w]);
       }
     } else {
       bob = -Math.abs(Math.sin(p)) * 34 * amp;
@@ -120,8 +124,8 @@ RR.Rig = (function () {
       }
       const swing = Math.sin(p) * 0.75 * amp;
       hands.push(
-        [armA[0] - Math.sin(0.95 - swing) * 285, armA[1] + Math.cos(0.95 - swing) * 285, -0.5],
-        [armB[0] + Math.sin(0.5 + swing) * 300, armB[1] - Math.cos(0.5 + swing) * 300, 0.7]
+        [armA[0] - Math.sin(0.95 - swing) * 285, armA[1] + Math.cos(0.95 - swing) * 285],
+        [armB[0] + Math.sin(0.5 + swing) * 300, armB[1] - Math.cos(0.5 + swing) * 300]
       );
     }
 
@@ -140,14 +144,12 @@ RR.Rig = (function () {
     ctx.rotate(tilt);
     ctx.translate(-590, -1090);
 
-    limb(ctx, armB[0], armB[1], hands[1][0], hands[1][1], 46);
-    hand(ctx, hands[1][0], hands[1][1], hands[1][2]);
+    arm(ctx, armB[0], armB[1], hands[1][0], hands[1][1], 46);
     limb(ctx, hipB[0], hipB[1], feet[1][0], feet[1][1] - bob, -30);
     foot(ctx, feet[1][0], feet[1][1] - bob, feet[1][2]);
     limb(ctx, hipA[0], hipA[1], feet[0][0], feet[0][1] - bob, -30);
     foot(ctx, feet[0][0], feet[0][1] - bob, feet[0][2]);
-    limb(ctx, armA[0], armA[1], hands[0][0], hands[0][1], -46);
-    hand(ctx, hands[0][0], hands[0][1], hands[0][2]);
+    arm(ctx, armA[0], armA[1], hands[0][0], hands[0][1], -46);
 
     const wind = Math.sin(s.t * 13) * 0.05 * (0.35 + sn);
     const lift = air ? Math.max(-0.35, Math.min(0.35, (s.vy || 0) / 1800)) : 0;
@@ -185,10 +187,8 @@ RR.Rig = (function () {
     foot(ctx, 595, 1740 - lift, -0.22);
     limb(ctx, 800, 1378, 815, 1720 - lift, -26);
     foot(ctx, 790, 1740 - lift, -0.3);
-    limb(ctx, shL[0], shL[1], hL[0], hL[1], 30);
-    hand(ctx, hL[0], hL[1], -0.5);
-    limb(ctx, shR[0], shR[1], hR[0], hR[1], 34);
-    hand(ctx, hR[0], hR[1], -0.5);
+    arm(ctx, shL[0], shL[1], hL[0], hL[1], 30);
+    arm(ctx, shR[0], shR[1], hR[0], hR[1], 34);
     leaves(ctx, 'man_leaves', 665, 790, Math.sin(t * 1.7) * 0.045 + (s.cheer ? Math.sin(t * 12) * 0.05 : 0));
     part(ctx, 'man_body');
   }

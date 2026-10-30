@@ -76,12 +76,13 @@ h1 {
 }
 
 .wappen { width: clamp(90px, 34vh, 210px); height: auto; display: block; }
-.wappen.small {
+.powered {
   position: absolute;
   right: max(2vmin, env(safe-area-inset-right));
-  bottom: max(2vmin, env(safe-area-inset-bottom));
-  width: clamp(44px, 16vh, 104px);
-  opacity: .5;
+  bottom: max(1.5vmin, env(safe-area-inset-bottom));
+  margin: 0;
+  font: 600 clamp(10px, 2.2vh, 14px)/1.2 var(--font);
+  color: var(--paper);
   pointer-events: none;
 }
 

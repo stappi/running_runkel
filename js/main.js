@@ -190,7 +190,7 @@
     ctx.save();
     ctx.translate(0, -36);
     const x = app.viewW * 0.77;
-    RR.Rig.draw(ctx, x, 480, { fig: 'man', t, wave: true, facing: -1 }, 2.75);
+    RR.Rig.draw(ctx, x, 480, { fig: 'man', t, wave: true, facing: 1 }, 2.75);
     ctx.restore();
   }
 
