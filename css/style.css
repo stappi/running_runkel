@@ -52,7 +52,7 @@ button { font-family: var(--font); color: var(--ink); cursor: pointer; touch-act
 
 #screen-title { justify-content: flex-start; padding-left: max(5%, env(safe-area-inset-left)); }
 
-.title-col { position: relative; max-width: 58%; }
+.title-col { max-width: 58%; }
 
 h1 {
   margin: 0;
@@ -78,10 +78,11 @@ h1 {
 .wappen { width: clamp(90px, 34vh, 210px); height: auto; display: block; }
 .wappen.small {
   position: absolute;
-  right: -22%;
-  top: 0;
+  right: max(2vmin, env(safe-area-inset-right));
+  bottom: max(2vmin, env(safe-area-inset-bottom));
   width: clamp(44px, 16vh, 104px);
-  filter: drop-shadow(2px 3px 0 rgba(27, 18, 10, .55));
+  opacity: .5;
+  pointer-events: none;
 }
 
 .buttons { display: flex; flex-wrap: wrap; gap: 1.6vh; }
