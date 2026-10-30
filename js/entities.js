@@ -308,11 +308,7 @@ RR.Entities = (function () {
     draw(ctx) {
       const b = Math.sin(this.t) * (this.gold ? 5 : 3);
       if (this.gold) {
-        ctx.save();
-        ctx.shadowColor = '#fff27a';
-        ctx.shadowBlur = 16;
         A().draw(ctx, 'gold_runkel', this.x - 20, this.y - 28 + b);
-        ctx.restore();
       } else {
         A().draw(ctx, 'seed', this.x - 11, this.y - 11 + b);
       }
