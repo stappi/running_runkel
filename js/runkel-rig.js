@@ -160,7 +160,8 @@ RR.Rig = (function () {
   }
 
   function drawMan(ctx, s) {
-    const OX = 730, OY = 1760;
+    // OX so gewaehlt, dass der Koerper beim Ueberblenden ueber dem des Renners liegt.
+    const OX = 664, OY = 1760;
     const t = s.t;
     const hop = s.cheer ? -Math.abs(Math.sin(t * 6)) * 240 : 0;
     const breathe = s.cheer ? 0 : Math.sin(t * 2.2) * 0.014;
@@ -267,5 +268,43 @@ RR.Rig = (function () {
     ctx.restore();
   }
 
-  return { draw };
+  // Ueberblendet zwei Figuren. Beide werden erst einzeln flach gerendert, damit
+  // Arme und Beine nicht durch den halbtransparenten Koerper scheinen.
+  const BLEND_W = 300, BLEND_H = 240, BLEND_X = 150, BLEND_Y = 220;
+  const buffers = [];
+
+  function buffer(i, w, h) {
+    if (!buffers[i]) buffers[i] = document.createElement('canvas');
+    const c = buffers[i];
+    if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+    return c;
+  }
+
+  function blend(ctx, x, y, from, to, k) {
+    const q = Math.abs(ctx.getTransform().a) || 1;
+    const w = Math.ceil(BLEND_W * q), h = Math.ceil(BLEND_H * q);
+    const layers = [from, to].map((pose, i) => {
+      const c = buffer(i, w, h);
+      const g = c.getContext('2d');
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      g.clearRect(0, 0, w, h);
+      g.setTransform(q, 0, 0, q, 0, 0);
+      draw(g, BLEND_X, BLEND_Y, pose);
+      return c;
+    });
+    const mix = buffer(2, w, h);
+    const m = mix.getContext('2d');
+    m.setTransform(1, 0, 0, 1, 0, 0);
+    m.globalCompositeOperation = 'source-over';
+    m.globalAlpha = 1;
+    m.clearRect(0, 0, w, h);
+    m.globalCompositeOperation = 'lighter';
+    m.globalAlpha = 1 - k;
+    m.drawImage(layers[0], 0, 0);
+    m.globalAlpha = k;
+    m.drawImage(layers[1], 0, 0);
+    ctx.drawImage(mix, x - BLEND_X, y - BLEND_Y, BLEND_W, BLEND_H);
+  }
+
+  return { draw, blend };
 })();
