@@ -44,6 +44,44 @@ public static class Slicer {
         }
         return o;
     }
+    // Fuellt das Polygon glatt aus seinem hellen Rand heraus: So verschwindet das aufgemalte
+    // Gesicht, der Farbverlauf des Koerpers bleibt. Dunkle Randpixel (Umrisse) zaehlen nicht mit.
+    public static Bitmap Erase(Bitmap src, PointF[] poly) {
+        int w=src.Width, h=src.Height;
+        var res = (Bitmap)src.Clone();
+        var mask = new Bitmap(w,h,PixelFormat.Format32bppArgb);
+        using (var g = Graphics.FromImage(mask)) g.FillPolygon(Brushes.White, poly);
+        int s, sm; var a = Bytes(res, out s); var mb = Bytes(mask, out sm);
+        mask.Dispose();
+        var inside = new bool[w*h];
+        var px = new float[3*w*h];
+        var list = new System.Collections.Generic.List<int>();
+        for (int i=0;i<w*h;i++) {
+            int o=(i/w)*s+(i%w)*4;
+            for (int c=0;c<3;c++) px[3*i+c]=a[o+c];
+            if (mb[(i/w)*sm+(i%w)*4+3]>128) { inside[i]=true; list.Add(i); }
+        }
+        var known = new bool[w*h];
+        for (int i=0;i<w*h;i++) known[i] = !inside[i] && px[3*i]+px[3*i+1]+px[3*i+2]>330 && a[(i/w)*s+(i%w)*4+3]>200;
+        int[] nb = { -1, 1, -w, w };
+        for (int it=0;it<1500;it++) foreach (int i in list) {
+            float r=0,gg=0,b=0; int n=0;
+            foreach (int d in nb) {
+                int j=i+d;
+                if (j<0||j>=w*h||!(known[j]||inside[j])) continue;
+                if (inside[j] && it==0 && !known[j]) continue;
+                r+=px[3*j]; gg+=px[3*j+1]; b+=px[3*j+2]; n++;
+            }
+            if (n==0) continue;
+            px[3*i]=r/n; px[3*i+1]=gg/n; px[3*i+2]=b/n; known[i]=true;
+        }
+        foreach (int i in list) {
+            int o=(i/w)*s+(i%w)*4;
+            for (int c=0;c<3;c++) a[o+c]=(byte)Math.Max(0,Math.Min(255,px[3*i+c]));
+        }
+        Store(res,a);
+        return res;
+    }
     // Maskiert das Bild mit einem Polygon; optional entfernt ein Opening duenne Linien
     // (Arme, Beine, Speedlines), die im Spiel neu gezeichnet werden.
     public static int[] Cut(Bitmap src, PointF[] poly, int openR, bool dropRing, string path) {
@@ -105,17 +143,23 @@ function Poly($coords) {
 }
 
 $parts = @(
-    @{ name='man_leaves';    src='Runkelman.png';    open=6; ring=$false; poly=@(0,0, 1414,0, 1414,770, 770,770, 690,775, 680,793, 665,793, 620,782, 470,820, 400,940, 0,960) },
-    @{ name='man_body';      src='Runkelman.png';    open=6; ring=$false; poly=@(460,840, 470,820, 620,782, 665,793, 680,793, 690,775, 770,770, 975,840, 975,1480, 460,1480) },
-    @{ name='inv_leaves';    src='Runkelinvalide.png'; open=0; ring=$true; poly=@(790,792, 775,680, 820,480, 850,280, 900,270, 1005,130, 1085,130, 1095,280, 1000,415, 1200,380, 1310,410, 1400,490, 1290,515, 1100,565, 885,720, 815,790) },
-    @{ name='inv_rest';      src='Runkelinvalide.png'; open=0; ring=$false; poly=@(0,1070, 490,1060, 520,960, 600,800, 780,786, 900,770, 1010,870, 1040,1020, 1414,1020, 1414,2000, 0,2000) }
+    @{ name='man_body'; src='Runkelman.png'; open=6; ring=$false; poly=@(460,840, 470,820, 620,782, 665,793, 680,793, 690,775, 770,770, 975,840, 975,1480, 460,1480);
+       erase=@(505,890, 600,850, 800,850, 875,900, 875,1148, 505,1148) },
+    @{ name='inv_body'; src='Runkelinvalide.png'; open=6; ring=$false; poly=@(505,1130, 515,1000, 600,810, 650,795, 780,776, 900,780, 1010,870, 1040,1020, 1040,1300, 990,1370, 880,1395, 830,1408, 800,1425, 762,1510, 725,1415, 690,1412, 590,1385, 530,1270);
+       erase=@(684,855, 760,850, 795,885, 860,912, 880,935, 905,985, 905,1100, 955,1140, 955,1225, 580,1225, 580,1140, 622,1090, 625,1020, 644,985, 660,945, 684,905) },
+    @{ name='inv_arm';  src='Runkelinvalide.png'; open=0; ring=$false; poly=@(15,1320, 360,1070, 512,1080, 512,1115, 450,1190, 80,1395, 15,1395) },
+    @{ name='inv_leg';  src='Runkelinvalide.png'; open=0; ring=$false; poly=@(828,1405, 855,1405, 855,1445, 915,1445, 955,1640, 1065,1645, 1070,1765, 950,1865, 850,1865, 790,1505) },
+    @{ name='inv_cane'; src='Runkelinvalide.png'; open=0; ring=$false; poly=@(1255,1205, 1335,1180, 1335,1290, 1255,1860, 1190,1860, 1190,1500) }
 )
 
 $cache = @{}
 $data = @()
 foreach ($p in $parts) {
     if (-not $cache.ContainsKey($p.src)) { $cache[$p.src] = Load-Scaled $p.src }
-    $r = [Slicer]::Cut($cache[$p.src], (Poly $p.poly), $p.open, $p.ring, (Join-Path $out_dir ($p.name + '.png')))
+    $source = $cache[$p.src]
+    if ($p.erase) { $source = [Slicer]::Erase($source, (Poly $p.erase)) }
+    $r = [Slicer]::Cut($source, (Poly $p.poly), $p.open, $p.ring, (Join-Path $out_dir ($p.name + '.png')))
+    if ($p.erase) { $source.Dispose() }
     $vals = ($r | ForEach-Object { [math]::Round($_ / $f, 1).ToString([cultureinfo]::InvariantCulture) }) -join ','
     $data += "  $($p.name): [$vals]"
     "$($p.name): $($r -join ' ') px"

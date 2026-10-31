@@ -18,6 +18,10 @@ RR.Player = (function () {
   const CALM_DELAY = 0.2;
   const CALM_IN = 0.3;
   const CALM_OUT = 0.1;
+  // Sprung- und Duckhaltung gleiten rasch ein, die Mimik wechselt noch etwas schneller.
+  const POSE_BLEND = 0.08;
+  const FACE_BLEND = 0.12;
+  const STUN = 0.5;
 
   class Player {
     constructor(x, y) {
@@ -38,11 +42,17 @@ RR.Player = (function () {
       this.buffer = 0;
       this.stun = 0;
       this.invuln = 0;
+      this.hurtFace = false;
       this.phase = 0;
       this.t = 0;
       this.squash = 0;
       this.still = 1;
       this.calm = 1;
+      this.airK = 0;
+      this.duckK = 0;
+      this.expr = 'happy';
+      this.exprFrom = 'happy';
+      this.exprK = 1;
       this.rideVx = 0;
       this.lastGroundY = y;
       this.dropThrough = false;
@@ -128,15 +138,40 @@ RR.Player = (function () {
       this.still = (Math.abs(this.vx) < 8 && (this.onGround || before)) ? this.still + dt : 0;
       const calmDown = world.state === 'won' || (this.still > CALM_DELAY && !this.duck);
       this.calm = calmDown ? Math.min(1, this.calm + dt / CALM_IN) : Math.max(0, this.calm - dt / CALM_OUT);
+
+      const step = dt / POSE_BLEND;
+      this.airK = this.onGround ? Math.max(0, this.airK - step) : Math.min(1, this.airK + step);
+      this.duckK = this.duck ? Math.min(1, this.duckK + step) : Math.max(0, this.duckK - step);
+
+      const expr = this.expression(world);
+      if (expr !== this.expr) {
+        this.exprFrom = this.expr;
+        this.expr = expr;
+        this.exprK = 0;
+      }
+      this.exprK = Math.min(1, this.exprK + dt / FACE_BLEND);
+    }
+
+    // Stehen: freundlich, Rennen: aengstlich, nach einem Treffer: kraenklich.
+    expression(world) {
+      if (world.state === 'won') return 'joy';
+      if (this.invuln > 0 && this.hurtFace) return 'sick';
+      if (this.duck) return 'duck';
+      if (!this.onGround) return this.vy < 80 ? 'jump' : 'fall';
+      return Math.abs(this.vx) > MAX_RUN * 0.25 ? 'scared' : 'happy';
     }
 
     pose(world) {
-      if (world.state === 'dead' || this.stun > 0) return { fig: 'inv', t: this.t, facing: this.facing };
+      if (world.state === 'dead' || this.stun > 0) {
+        return { fig: 'inv', t: this.t, facing: this.facing, hit: STUN - Math.max(0, this.stun), airK: this.airK };
+      }
       return {
         fig: 'man', t: this.t, phase: this.phase, facing: world.state === 'won' ? 1 : this.facing,
         calm: this.calm, cheer: world.state === 'won', wave: Math.sin(this.t * 0.7) > 0.55,
         sn: Math.min(1, Math.abs(this.vx) / MAX_RUN),
-        vy: this.vy, onGround: this.onGround, duck: this.duck, squash: this.squash
+        vy: this.vy, onGround: this.onGround, duck: this.duck, squash: this.squash,
+        airK: this.airK, duckK: this.duckK, sick: this.expr === 'sick',
+        expr: this.expr, exprFrom: this.exprFrom, exprK: this.exprK
       };
     }
 

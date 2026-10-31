@@ -197,25 +197,27 @@
   function drawRigSheet(t) {
     ctx.fillStyle = '#bfe3f2';
     ctx.fillRect(0, 0, app.viewW, 540);
-    const run = { fig: 'man', calm: 0, t, phase: t * 13.5, onGround: true, facing: 1, sn: 1, vy: 0 };
+    const run = { fig: 'man', calm: 0, t, phase: t * 13.5, onGround: true, facing: 1, sn: 1, vy: 0, expr: 'scared' };
     const rows = [
       ['Laufen', run],
       ['Traben', Object.assign({}, run, { sn: 0.45, phase: t * 6 })],
-      ['Sprung', Object.assign({}, run, { onGround: false, vy: -500 })],
-      ['Fallen', Object.assign({}, run, { onGround: false, vy: 500 })],
-      ['Ducken', Object.assign({}, run, { duck: true, sn: 0 })],
-      ['Landung', Object.assign({}, run, { sn: 0, squash: 1 })],
+      ['Sprung', Object.assign({}, run, { onGround: false, vy: -500, expr: 'jump' })],
+      ['Fallen', Object.assign({}, run, { onGround: false, vy: 500, expr: 'fall' })],
+      ['Ducken', Object.assign({}, run, { duck: true, sn: 0, expr: 'duck' })],
+      ['Landung', Object.assign({}, run, { sn: 0, squash: 1, expr: 'happy' })],
       ['Stehen', { fig: 'man', t, facing: 1, wave: true }],
       ['Jubel', { fig: 'man', t, cheer: true, facing: 1 }],
-      ['Treffer', { fig: 'inv', t, facing: 1 }],
-      ['Übergang', Object.assign({}, run, { sn: 0, calm: 0.5 })]
+      ['Treffer', { fig: 'inv', t, facing: 1, airK: 1, hit: t % 1 }],
+      ['Verletzt', { fig: 'inv', t, facing: 1 }],
+      ['Angeschlagen', Object.assign({}, run, { sn: 0.6, phase: t * 8, sick: true, expr: 'sick' })],
+      ['Übergang', Object.assign({}, run, { sn: 0, calm: 0.5, expr: 'happy' })]
     ];
     ctx.fillStyle = '#000';
     ctx.font = '700 15px sans-serif';
     ctx.textAlign = 'center';
     rows.forEach((r, i) => {
-      const col = i % 5, row = i < 5 ? 0 : 1;
-      const x = app.viewW * (col + 0.5) / 5, y = 240 + row * 260;
+      const col = i % 6, row = i < 6 ? 0 : 1;
+      const x = app.viewW * (col + 0.5) / 6, y = 240 + row * 260;
       ctx.fillStyle = '#6a9e38';
       ctx.fillRect(x - 80, y, 160, 4);
       RR.Rig.draw(ctx, x, y, r[1], 1.5);

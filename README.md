@@ -31,7 +31,7 @@ python -m http.server 8123
 
 | Pfad | Inhalt |
 |---|---|
-| `js/runkel-rig.js` | Animation der Figur aus den zugeschnittenen Vorlagen |
+| `js/runkel-rig.js` | Animation der Figur: Haltungen, biegsame Blätter und Mimik je Zustand |
 | `js/levels.js` | Leveldaten als Textraster, die Legende steht am Dateianfang |
 | `js/game.js`, `player.js`, `entities.js`, `physics.js`, `level.js` | Spiellogik und Zeichnen der Welt |
 | `js/main.js`, `hud.js`, `input.js`, `audio.js`, `assets.js` | Schleife, Menüs, Anzeige, Eingabe, Ton, Laden |

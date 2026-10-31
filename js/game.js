@@ -173,6 +173,7 @@ RR.World = (function () {
       p.hearts--;
       p.stun = 0.5;
       p.invuln = 1.9;
+      p.hurtFace = true;
       p.vx = (p.x < fromX ? -1 : 1) * 230;
       p.vy = -420;
       p.onGround = false;
