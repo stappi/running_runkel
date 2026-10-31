@@ -2,7 +2,7 @@
 window.RR = window.RR || {};
 
 RR.Assets = (function () {
-  const SPRITES = ['runner_body', 'runner_leaves', 'man_body', 'man_leaves', 'inv_rest', 'inv_leaves'];
+  const SPRITES = ['man_body', 'man_leaves', 'inv_rest', 'inv_leaves'];
   // Name -> [Breite, Hoehe] in Spieleinheiten
   const SVGS = {
     boar: [120, 80], cow: [160, 110], tractor: [220, 170], wheel_big: [84, 84], wheel_small: [52, 52],

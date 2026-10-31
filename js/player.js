@@ -14,11 +14,10 @@ RR.Player = (function () {
   const BUFFER = 0.12;
   const STAND_H = 68;
   const DUCK_H = 42;
-  // Vom panischen Renner zum ruhigen Runkelman: erst nach einer Weile und langsam,
-  // beim Loslaufen dagegen schnell.
-  const CALM_DELAY = 0.7;
-  const CALM_IN = 0.6;
-  const CALM_OUT = 0.2;
+  // Von der Lauf- in die Ruhehaltung: beim Anhalten gemaechlich, beim Loslaufen schnell.
+  const CALM_DELAY = 0.2;
+  const CALM_IN = 0.3;
+  const CALM_OUT = 0.1;
 
   class Player {
     constructor(x, y) {
@@ -131,31 +130,19 @@ RR.Player = (function () {
       this.calm = calmDown ? Math.min(1, this.calm + dt / CALM_IN) : Math.max(0, this.calm - dt / CALM_OUT);
     }
 
-    runnerPose() {
+    pose(world) {
+      if (world.state === 'dead' || this.stun > 0) return { fig: 'inv', t: this.t, facing: this.facing };
       return {
-        fig: 'runner', t: this.t, phase: this.phase, facing: this.facing,
+        fig: 'man', t: this.t, phase: this.phase, facing: world.state === 'won' ? 1 : this.facing,
+        calm: this.calm, cheer: world.state === 'won', wave: Math.sin(this.t * 0.7) > 0.55,
         sn: Math.min(1, Math.abs(this.vx) / MAX_RUN),
         vy: this.vy, onGround: this.onGround, duck: this.duck, squash: this.squash
       };
     }
 
-    manPose(world) {
-      if (world.state === 'won') return { fig: 'man', cheer: true, t: this.t, facing: 1 };
-      return { fig: 'man', t: this.t, facing: this.facing, wave: Math.sin(this.t * 0.7) > 0.55 };
-    }
-
     draw(ctx, world) {
       if (this.invuln > 0 && this.stun <= 0 && world.state === 'play' && Math.floor(this.t * 14) % 2) return;
-      const y = this.y + 1;
-      if (world.state === 'dead' || this.stun > 0) {
-        RR.Rig.draw(ctx, this.x, y, { fig: 'inv', t: this.t, facing: this.facing });
-      } else if (this.calm <= 0) {
-        RR.Rig.draw(ctx, this.x, y, this.runnerPose());
-      } else if (this.calm >= 1) {
-        RR.Rig.draw(ctx, this.x, y, this.manPose(world));
-      } else {
-        RR.Rig.blend(ctx, this.x, y, this.runnerPose(), this.manPose(world), this.calm);
-      }
+      RR.Rig.draw(ctx, this.x, this.y + 1, this.pose(world));
     }
   }
 

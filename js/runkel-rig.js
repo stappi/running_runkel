@@ -1,11 +1,16 @@
 // Cut-out-Rig der Runkel: Koerper und Blaetter stammen aus den Vorlagen,
 // Arme und Beine werden in deren Stil neu gezeichnet und frei bewegt.
-// Alle Masse sind Vorlagen-Einheiten (Ansicht 1414x2000).
+// Alle Masse sind Vorlagen-Einheiten (Ansicht 1414x2000). Vorne ist +x.
 window.RR = window.RR || {};
 
 RR.Rig = (function () {
   const LIMB = 10;
-  const SCALE = { runner: 0.08, man: 0.072, inv: 0.066 };
+  const SCALE = { man: 0.072, inv: 0.066 };
+  const OX = 720, OY = 1760;
+  const HIP_L = [660, 1385], HIP_R = [800, 1378];
+  const SHOULDER_L = [484, 1085], SHOULDER_R = [956, 1062];
+  const LEG = 350;
+  const ARM = 380;
 
   function part(ctx, name) {
     const p = RR.SPRITE_PARTS[name];
@@ -70,128 +75,140 @@ RR.Rig = (function () {
     ctx.lineCap = 'round';
     ctx.lineWidth = 7;
     const jitter = Math.sin(t * 40) * 14;
-    [[850, 1100, 1320, 1110], [915, 1145, 1390, 1155], [895, 1185, 1370, 1195]].forEach(l => {
+    [[440, 1100, -30, 1110], [375, 1145, -100, 1155], [395, 1185, -80, 1195]].forEach(l => {
       ctx.beginPath();
       ctx.moveTo(l[0] + jitter, l[1]);
       ctx.quadraticCurveTo((l[0] + l[2]) / 2, l[1] + 44, l[2] + jitter, l[3]);
       ctx.stroke();
     });
-    [[1035, 1115, 1030, 1225], [1098, 1085, 1115, 1250]].forEach(l => {
+    [[255, 1115, 260, 1225], [190, 1085, 175, 1250]].forEach(l => {
       ctx.beginPath();
       ctx.moveTo(l[0] + jitter, l[1]);
-      ctx.quadraticCurveTo(l[0] + 26 + jitter, (l[1] + l[3]) / 2, l[2] + jitter, l[3]);
+      ctx.quadraticCurveTo(l[0] - 26 + jitter, (l[1] + l[3]) / 2, l[2] + jitter, l[3]);
       ctx.stroke();
     });
     ctx.restore();
   }
 
-  // Quelle laeuft nach links: vorne ist -x.
-  function drawRunner(ctx, s) {
-    const OX = 640, OY = 1640;
-    const hipA = [620, 1325], hipB = [745, 1280];
-    const armA = [408, 1160], armB = [788, 985];
-    const L = 300, sn = s.sn || 0;
-    const air = !s.onGround;
-    const amp = 0.3 + 0.7 * sn;
-    const p = s.phase || 0;
-
-    let bob = 0, tilt = 0;
-    const feet = [];
-    const hands = [];
-
-    if (s.duck) {
-      feet.push([hipA[0] - 80, hipA[1] + L, 0], [hipB[0] + 50, hipB[1] + L + 40, 0]);
-      hands.push([armA[0] - 170, armA[1] + 150], [armB[0] + 180, armB[1] + 240]);
-    } else if (air) {
-      const rising = s.vy < 80;
-      if (rising) {
-        feet.push([hipA[0] - 150, hipA[1] + 190, -0.5], [hipB[0] + 110, hipB[1] + 170, 0.5]);
-        hands.push([armA[0] - 200, armA[1] - 210], [armB[0] + 150, armB[1] - 300]);
-      } else {
-        const w = Math.sin(s.t * 26) * 26;
-        feet.push([hipA[0] - 70, hipA[1] + 285, -0.25], [hipB[0] + 95, hipB[1] + 265, 0.25]);
-        hands.push([armA[0] - 230, armA[1] - 170 + w], [armB[0] + 190, armB[1] - 250 - w]);
-      }
-    } else {
-      bob = -Math.abs(Math.sin(p)) * 34 * amp;
-      tilt = Math.sin(p) * 0.035 * amp;
-      for (let i = 0; i < 2; i++) {
-        const a = p + i * Math.PI;
-        const th = Math.sin(a) * 0.95 * amp;
-        const hip = i ? hipB : hipA;
-        const lift = Math.max(0, Math.cos(a)) * 95 * amp;
-        feet.push([hip[0] - Math.sin(th) * L, hip[1] + Math.cos(th) * L - lift, -th * 0.55]);
-      }
-      const swing = Math.sin(p) * 0.75 * amp;
-      hands.push(
-        [armA[0] - Math.sin(0.95 - swing) * 285, armA[1] + Math.cos(0.95 - swing) * 285],
-        [armB[0] + Math.sin(0.5 + swing) * 300, armB[1] - Math.cos(0.5 + swing) * 300]
-      );
-    }
-
-    ctx.translate(-OX, -OY);
-    if (s.duck) {
-      ctx.translate(OX, OY);
-      ctx.scale(1.14, 0.66);
-      ctx.translate(-OX, -OY);
-    } else if (s.squash) {
-      ctx.translate(OX, OY);
-      ctx.scale(1 + 0.16 * s.squash, 1 - 0.18 * s.squash);
-      ctx.translate(-OX, -OY);
-    }
-    ctx.translate(0, bob);
-    ctx.translate(590, 1090);
-    ctx.rotate(tilt);
-    ctx.translate(-590, -1090);
-
-    arm(ctx, armB[0], armB[1], hands[1][0], hands[1][1], 46);
-    limb(ctx, hipB[0], hipB[1], feet[1][0], feet[1][1] - bob, -30);
-    foot(ctx, feet[1][0], feet[1][1] - bob, feet[1][2]);
-    limb(ctx, hipA[0], hipA[1], feet[0][0], feet[0][1] - bob, -30);
-    foot(ctx, feet[0][0], feet[0][1] - bob, feet[0][2]);
-    arm(ctx, armA[0], armA[1], hands[0][0], hands[0][1], -46);
-
-    const wind = Math.sin(s.t * 13) * 0.05 * (0.35 + sn);
-    const lift = air ? Math.max(-0.35, Math.min(0.35, (s.vy || 0) / 1800)) : 0;
-    const lean = s.duck ? 0.55 : 0.2 * sn;
-    leaves(ctx, 'runner_leaves', 490, 838, wind + lean - lift);
-    part(ctx, 'runner_body');
-    if (sn > 0.85 && !s.duck) speedLines(ctx, s.t, (sn - 0.85) / 0.15 * 0.85);
+  // Eine Haltung: Fuesse [x, y, Winkel], Haende [x, y], Beinkruemmung und Koerperlage.
+  function pose(feet, hands, o) {
+    return Object.assign({ feet, hands, bend: [-26, -26], hop: 0, tilt: 0, lean: 0, leaf: 0, sx: 1, sy: 1 }, o);
   }
 
-  function drawMan(ctx, s) {
-    // OX so gewaehlt, dass der Koerper beim Ueberblenden ueber dem des Renners liegt.
-    const OX = 664, OY = 1760;
+  function runPose(s) {
+    const sn = s.sn || 0;
+    const wind = Math.sin(s.t * 13) * 0.05 * (0.35 + sn);
+    if (s.duck) {
+      return pose(
+        [[HIP_L[0] - 80, HIP_L[1] + LEG, -0.2], [HIP_R[0] + 70, HIP_R[1] + LEG, -0.2]],
+        [[SHOULDER_L[0] - 170, SHOULDER_L[1] + 150], [SHOULDER_R[0] + 170, SHOULDER_R[1] + 170]],
+        { leaf: -0.55 + wind, sx: 1.14, sy: 0.66 }
+      );
+    }
+    if (!s.onGround) {
+      const lift = Math.max(-0.35, Math.min(0.35, (s.vy || 0) / 1800));
+      const leaf = wind - 0.2 * sn + lift;
+      if (s.vy < 80) {
+        return pose(
+          [[HIP_L[0] - 140, HIP_L[1] + 210, -0.5], [HIP_R[0] + 150, HIP_R[1] + 200, 0.3]],
+          [[SHOULDER_L[0] - 210, SHOULDER_L[1] - 230], [SHOULDER_R[0] + 210, SHOULDER_R[1] - 290]],
+          { leaf, lean: 0.08 * sn }
+        );
+      }
+      const w = Math.sin(s.t * 26) * 26;
+      return pose(
+        [[HIP_L[0] - 80, HIP_L[1] + 325, -0.35], [HIP_R[0] + 90, HIP_R[1] + 305, 0.1]],
+        [[SHOULDER_L[0] - 250, SHOULDER_L[1] - 180 + w], [SHOULDER_R[0] + 240, SHOULDER_R[1] - 240 - w]],
+        { leaf, lean: 0.08 * sn }
+      );
+    }
+    const p = s.phase || 0;
+    const amp = 0.3 + 0.7 * sn;
+    const feet = [HIP_L, HIP_R].map((hip, i) => {
+      const a = p + i * Math.PI;
+      const th = Math.sin(a) * 0.9 * amp;
+      const up = Math.max(0, Math.cos(a)) * 95 * amp;
+      return [hip[0] + Math.sin(th) * LEG, hip[1] + Math.cos(th) * LEG - up, th * 0.55 - 0.15];
+    });
+    const swing = Math.sin(p) * 0.75 * amp;
+    return pose(feet, [
+      [SHOULDER_L[0] - Math.sin(0.95 - swing) * ARM, SHOULDER_L[1] + Math.cos(0.95 - swing) * ARM],
+      [SHOULDER_R[0] + Math.sin(0.65 + swing) * ARM, SHOULDER_R[1] - Math.cos(0.65 + swing) * ARM]
+    ], {
+      hop: -Math.abs(Math.sin(p)) * 34 * amp,
+      tilt: Math.sin(p) * 0.035 * amp,
+      lean: 0.2 * sn,
+      leaf: wind - 0.2 * sn,
+      sx: 1 + 0.16 * (s.squash || 0),
+      sy: 1 - 0.18 * (s.squash || 0)
+    });
+  }
+
+  function idlePose(s) {
     const t = s.t;
-    const hop = s.cheer ? -Math.abs(Math.sin(t * 6)) * 240 : 0;
-    const breathe = s.cheer ? 0 : Math.sin(t * 2.2) * 0.014;
-    const shL = [484, 1085], shR = [956, 1062];
-    let hL, hR;
+    const leaf = Math.sin(t * 1.7) * 0.045;
     if (s.cheer) {
       const w = Math.sin(t * 12) * 50;
-      hL = [190, 720 + w];
-      hR = [1270, 700 - w];
-    } else {
-      const wave = s.wave ? Math.sin(t * 9) * 0.32 : Math.sin(t * 1.6) * 0.04;
-      const a = Math.atan2(850 - shR[1], 1320 - shR[0]) + wave;
-      hR = [shR[0] + Math.cos(a) * 415, shR[1] + Math.sin(a) * 415];
-      hL = [106, 1300 + Math.sin(t * 1.6) * 10];
+      const up = Math.abs(Math.sin(t * 6)) * 70;
+      return pose([[595, 1740 - up, -0.22], [790, 1740 - up, -0.3]], [[190, 720 + w], [1270, 700 - w]], {
+        hop: -Math.abs(Math.sin(t * 6)) * 240,
+        bend: [26, -26],
+        leaf: leaf + Math.sin(t * 12) * 0.05
+      });
     }
-    const lift = s.cheer ? Math.abs(Math.sin(t * 6)) * 70 : 0;
+    const wave = s.wave ? Math.sin(t * 9) * 0.32 : Math.sin(t * 1.6) * 0.04;
+    const a = Math.atan2(850 - SHOULDER_R[1], 1320 - SHOULDER_R[0]) + wave;
+    const breathe = Math.sin(t * 2.2) * 0.014;
+    return pose(
+      [[595, 1740, -0.22], [790, 1740, -0.3]],
+      [[106, 1300 + Math.sin(t * 1.6) * 10], [SHOULDER_R[0] + Math.cos(a) * 415, SHOULDER_R[1] + Math.sin(a) * 415]],
+      { bend: [26, -26], leaf, sx: 1 - breathe, sy: 1 + breathe }
+    );
+  }
+
+  const mix = (a, b, k) => a + (b - a) * k;
+
+  function blendPose(a, b, k) {
+    const out = {};
+    Object.keys(a).forEach(key => {
+      if (typeof a[key] === 'number') out[key] = mix(a[key], b[key], k);
+    });
+    out.feet = a.feet.map((f, i) => f.map((v, j) => mix(v, b.feet[i][j], k)));
+    out.hands = a.hands.map((h, i) => h.map((v, j) => mix(v, b.hands[i][j], k)));
+    out.bend = a.bend.map((v, i) => mix(v, b.bend[i], k));
+    return out;
+  }
+
+  // calm: 0 = in Bewegung, 1 = ruhig; dazwischen gleiten die Gliedmassen ineinander.
+  function drawMan(ctx, s) {
+    const calm = s.calm === undefined ? 1 : s.calm;
+    let p;
+    if (calm <= 0) p = runPose(s);
+    else if (calm >= 1) p = idlePose(s);
+    else p = blendPose(runPose(s), idlePose(s), calm);
 
     ctx.translate(-OX, -OY);
     ctx.translate(OX, OY);
-    ctx.scale(1 - breathe, 1 + breathe);
-    ctx.translate(-OX, -OY + hop);
+    ctx.rotate(p.lean);
+    ctx.scale(p.sx, p.sy);
+    ctx.translate(-OX, -OY);
+    ctx.translate(0, p.hop);
+    ctx.translate(OX, 1120);
+    ctx.rotate(p.tilt);
+    ctx.translate(-OX, -1120);
 
-    limb(ctx, 660, 1385, 610, 1725 - lift, 26);
-    foot(ctx, 595, 1740 - lift, -0.22);
-    limb(ctx, 800, 1378, 815, 1720 - lift, -26);
-    foot(ctx, 790, 1740 - lift, -0.3);
-    arm(ctx, shL[0], shL[1], hL[0], hL[1], 30);
-    arm(ctx, shR[0], shR[1], hR[0], hR[1], 34);
-    leaves(ctx, 'man_leaves', 665, 790, Math.sin(t * 1.7) * 0.045 + (s.cheer ? Math.sin(t * 12) * 0.05 : 0));
+    [HIP_L, HIP_R].forEach((hip, i) => {
+      const f = p.feet[i];
+      limb(ctx, hip[0], hip[1], f[0] + 15, f[1] - p.hop - 15, p.bend[i]);
+      foot(ctx, f[0], f[1] - p.hop, f[2]);
+    });
+    arm(ctx, SHOULDER_L[0], SHOULDER_L[1], p.hands[0][0], p.hands[0][1], 30);
+    arm(ctx, SHOULDER_R[0], SHOULDER_R[1], p.hands[1][0], p.hands[1][1], 34);
+
+    leaves(ctx, 'man_leaves', 665, 790, p.leaf);
     part(ctx, 'man_body');
+    const sn = s.sn || 0;
+    if (calm <= 0 && sn > 0.85 && !s.duck) speedLines(ctx, s.t, (sn - 0.85) / 0.15 * 0.85);
   }
 
   function star(ctx, x, y, r, rot, col) {
@@ -236,14 +253,14 @@ RR.Rig = (function () {
   }
 
   function drawInvalid(ctx, s) {
-    const OX = 760, OY = 1845;
+    const INV_X = 760, INV_Y = 1845;
     const t = s.t;
     const wob = Math.sin(t * 3.4) * 0.055;
     const dip = Math.abs(Math.sin(t * 3.4)) * 30;
-    ctx.translate(-OX, -OY);
-    ctx.translate(OX, OY);
+    ctx.translate(-INV_X, -INV_Y);
+    ctx.translate(INV_X, INV_Y);
     ctx.rotate(wob);
-    ctx.translate(-OX, -OY + dip);
+    ctx.translate(-INV_X, -INV_Y + dip);
     const cx = 850, cy = 640;
     ring(ctx, cx, cy, false);
     orbitStars(ctx, t, cx, cy, false);
@@ -254,57 +271,15 @@ RR.Rig = (function () {
   }
 
   // Zeichnet die Figur mit den Fuessen auf (x, y).
-  function draw(ctx, x, y, pose, sizeFactor) {
-    const fig = pose.fig || 'runner';
-    const k = SCALE[fig] * (sizeFactor || 1);
-    const facing = pose.facing || 1;
+  function draw(ctx, x, y, s, sizeFactor) {
+    const k = SCALE[s.fig] * (sizeFactor || 1);
     ctx.save();
     ctx.translate(x, y);
-    // Der Renner schaut in der Vorlage nach links, die anderen nach rechts.
-    ctx.scale((fig === 'runner' ? -facing : facing) * k, k);
-    if (fig === 'runner') drawRunner(ctx, pose);
-    else if (fig === 'man') drawMan(ctx, pose);
-    else drawInvalid(ctx, pose);
+    ctx.scale((s.facing || 1) * k, k);
+    if (s.fig === 'man') drawMan(ctx, s);
+    else drawInvalid(ctx, s);
     ctx.restore();
   }
 
-  // Ueberblendet zwei Figuren. Beide werden erst einzeln flach gerendert, damit
-  // Arme und Beine nicht durch den halbtransparenten Koerper scheinen.
-  const BLEND_W = 300, BLEND_H = 240, BLEND_X = 150, BLEND_Y = 220;
-  const buffers = [];
-
-  function buffer(i, w, h) {
-    if (!buffers[i]) buffers[i] = document.createElement('canvas');
-    const c = buffers[i];
-    if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
-    return c;
-  }
-
-  function blend(ctx, x, y, from, to, k) {
-    const q = Math.abs(ctx.getTransform().a) || 1;
-    const w = Math.ceil(BLEND_W * q), h = Math.ceil(BLEND_H * q);
-    const layers = [from, to].map((pose, i) => {
-      const c = buffer(i, w, h);
-      const g = c.getContext('2d');
-      g.setTransform(1, 0, 0, 1, 0, 0);
-      g.clearRect(0, 0, w, h);
-      g.setTransform(q, 0, 0, q, 0, 0);
-      draw(g, BLEND_X, BLEND_Y, pose);
-      return c;
-    });
-    const mix = buffer(2, w, h);
-    const m = mix.getContext('2d');
-    m.setTransform(1, 0, 0, 1, 0, 0);
-    m.globalCompositeOperation = 'source-over';
-    m.globalAlpha = 1;
-    m.clearRect(0, 0, w, h);
-    m.globalCompositeOperation = 'lighter';
-    m.globalAlpha = 1 - k;
-    m.drawImage(layers[0], 0, 0);
-    m.globalAlpha = k;
-    m.drawImage(layers[1], 0, 0);
-    ctx.drawImage(mix, x - BLEND_X, y - BLEND_Y, BLEND_W, BLEND_H);
-  }
-
-  return { draw, blend };
+  return { draw };
 })();

@@ -105,8 +105,6 @@ function Poly($coords) {
 }
 
 $parts = @(
-    @{ name='runner_leaves'; src='Runkelrenner.png'; open=6; ring=$false; poly=@(0,0, 948,0, 948,850, 770,850, 720,800, 630,770, 510,800, 487,840, 440,822, 0,850) },
-    @{ name='runner_body';   src='Runkelrenner.png'; open=6; ring=$false; poly=@(0,850, 440,822, 487,840, 510,800, 630,770, 720,800, 770,850, 840,900, 840,1400, 0,1400) },
     @{ name='man_leaves';    src='Runkelman.png';    open=6; ring=$false; poly=@(0,0, 1414,0, 1414,770, 770,770, 690,775, 680,793, 665,793, 620,782, 470,820, 400,940, 0,960) },
     @{ name='man_body';      src='Runkelman.png';    open=6; ring=$false; poly=@(460,840, 470,820, 620,782, 665,793, 680,793, 690,775, 770,770, 975,840, 975,1480, 460,1480) },
     @{ name='inv_leaves';    src='Runkelinvalide.png'; open=0; ring=$true; poly=@(790,792, 775,680, 820,480, 850,280, 900,270, 1005,130, 1085,130, 1095,280, 1000,415, 1200,380, 1310,410, 1400,490, 1290,515, 1100,565, 885,720, 815,790) },

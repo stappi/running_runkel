@@ -197,7 +197,7 @@
   function drawRigSheet(t) {
     ctx.fillStyle = '#bfe3f2';
     ctx.fillRect(0, 0, app.viewW, 540);
-    const run = { fig: 'runner', t, phase: t * 13.5, onGround: true, facing: 1, sn: 1, vy: 0 };
+    const run = { fig: 'man', calm: 0, t, phase: t * 13.5, onGround: true, facing: 1, sn: 1, vy: 0 };
     const rows = [
       ['Laufen', run],
       ['Traben', Object.assign({}, run, { sn: 0.45, phase: t * 6 })],
@@ -208,7 +208,7 @@
       ['Stehen', { fig: 'man', t, facing: 1, wave: true }],
       ['Jubel', { fig: 'man', t, cheer: true, facing: 1 }],
       ['Treffer', { fig: 'inv', t, facing: 1 }],
-      ['Übergang', Object.assign({}, run, { sn: 0, blend: { fig: 'man', t, facing: 1 } })]
+      ['Übergang', Object.assign({}, run, { sn: 0, calm: 0.5 })]
     ];
     ctx.fillStyle = '#000';
     ctx.font = '700 15px sans-serif';
@@ -218,8 +218,7 @@
       const x = app.viewW * (col + 0.5) / 5, y = 240 + row * 260;
       ctx.fillStyle = '#6a9e38';
       ctx.fillRect(x - 80, y, 160, 4);
-      if (r[1].blend) RR.Rig.blend(ctx, x, y, r[1], r[1].blend, 0.5);
-      else RR.Rig.draw(ctx, x, y, r[1], 1.5);
+      RR.Rig.draw(ctx, x, y, r[1], 1.5);
       ctx.fillStyle = '#000';
       ctx.fillText(r[0], x, y + 20);
     });
