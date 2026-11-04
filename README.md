@@ -34,9 +34,10 @@ python -m http.server 8123
 | `js/runkel-rig.js` | Animation der Figur: Haltungen, biegsame Blätter und Mimik je Zustand |
 | `js/levels.js` | Leveldaten als Textraster, die Legende steht am Dateianfang |
 | `js/game.js`, `player.js`, `entities.js`, `physics.js`, `level.js` | Spiellogik und Zeichnen der Welt |
+| `js/scenery.js` | Münsterländische Kulisse im Stil von Runkel Royal: Höfe, Wallhecken, Kopfweiden, Kirchtürme |
 | `js/main.js`, `hud.js`, `input.js`, `audio.js`, `assets.js` | Schleife, Menüs, Anzeige, Eingabe, Ton, Laden |
 | `assets/sprites` | Aus den Vorlagen geschnittene Teile, erzeugt von `tools/slice-sprites.ps1` |
-| `assets/svg` | Gegner, Objekte und Hintergründe |
+| `assets/svg` | Gegner und Objekte |
 
 ## Testen
 

@@ -15,7 +15,8 @@ window.RR = window.RR || {};
       name: 'Der Runkelacker',
       theme: {
         id: 'acker', dirt: '#6e4a28', dirtDark: '#56391e', grass: '#7fa82a', grassLight: '#a7bd2f', furrows: true,
-        sky: ['#8fd3f0', '#d8f1f7', '#fff0c4'], sun: '#ffe35a', sunX: 0.2, sunY: 86, cloud: '#ffffff',
+        sky: ['#3f9be0', '#9fd2f0', '#e4f3f6'], sun: '#fff3b0', sunGlow: 'rgba(255, 240, 170, .35)', sunX: 0.2, sunY: 86,
+        cloud: ['#f8fbff', '#ffffff'],
         dust: 'rgba(110, 74, 40, .8)'
       },
       clubs: { first: 7, interval: 4.4, speed: 500, heights: ['low', 'mid', 'high'] },
@@ -97,7 +98,8 @@ window.RR = window.RR || {};
       name: 'Die Viehweide',
       theme: {
         id: 'weide', dirt: '#7a5a30', dirtDark: '#5f4524', grass: '#5fb02f', grassLight: '#8fd34a', furrows: false,
-        sky: ['#62bdf0', '#a9e0f7', '#e9f7e0'], sun: '#fff06a', sunX: 0.55, sunY: 70, cloud: '#ffffff',
+        sky: ['#4aa6e4', '#a9dcf3', '#eaf6e6'], sun: '#fff3b0', sunGlow: 'rgba(255, 240, 170, .35)', sunX: 0.55, sunY: 70,
+        cloud: ['#f8fbff', '#ffffff'],
         dust: 'rgba(120, 90, 50, .8)'
       },
       clubs: { first: 6, interval: 3.8, speed: 540, heights: ['low', 'mid', 'high'] },
@@ -177,7 +179,8 @@ window.RR = window.RR || {};
       name: 'Hof und Feldweg',
       theme: {
         id: 'hof', dirt: '#9a7a45', dirtDark: '#7c6034', grass: '#a8923c', grassLight: '#cdb65a', furrows: false,
-        sky: ['#3f4a86', '#d9698a', '#ffb65c'], sun: '#ff8f3a', sunX: 0.72, sunY: 240, cloud: '#f7c4b0',
+        sky: ['#3f4a86', '#d9698a', '#ffb65c'], sun: '#ffb04a', sunGlow: 'rgba(255, 170, 90, .35)', sunX: 0.72, sunY: 240,
+        cloud: ['#e9a99a', '#f7c4b0'],
         tintFar: 'rgba(120, 50, 90, .38)', tintMid: 'rgba(130, 60, 70, .3)', tintNear: 'rgba(110, 50, 60, .24)',
         dust: 'rgba(170, 140, 90, .85)'
       },

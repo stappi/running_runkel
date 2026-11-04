@@ -193,20 +193,13 @@ RR.Level = (function () {
 
   const clouds = [[120, 70, 1.1], [520, 40, 0.8], [840, 96, 1.3], [1260, 54, 0.9], [1640, 86, 1.15]];
 
-  function drawCloud(ctx, x, y, k) {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(k, k);
-    ctx.beginPath();
-    ctx.moveTo(-60, 20);
-    ctx.bezierCurveTo(-90, 18, -82, -14, -50, -8);
-    ctx.bezierCurveTo(-44, -34, -6, -36, 4, -14);
-    ctx.bezierCurveTo(22, -28, 56, -18, 52, -2);
-    ctx.bezierCurveTo(84, -4, 84, 20, 56, 20);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    ctx.restore();
+  // Weiche Haufenwolke ohne Umriss, oben heller, wie in Runkel Royal
+  function drawCloud(ctx, x, y, k, seed, colors) {
+    const rnd = RR.Scenery.seeded(seed);
+    const pts = [];
+    for (let i = 0; i < 6; i++) pts.push([x + (i - 2.5) * 21 * k, y + (rnd() - 0.5) * 14 * k, (13 + rnd() * 11) * k]);
+    RR.Scenery.blob(ctx, colors[0], pts);
+    RR.Scenery.blob(ctx, colors[1], pts.map(p => [p[0], p[1] - p[2] * 0.22, p[2] * 0.72]));
   }
 
   function drawBackground(ctx, level, cam, viewW, viewH, time) {
@@ -216,29 +209,28 @@ RR.Level = (function () {
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, viewW, viewH);
 
-    // Sonne
-    ctx.fillStyle = th.sun;
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 4;
+    // Sonne mit Lichthof
+    const sx = viewW * th.sunX - cam.x * 0.02;
+    ctx.fillStyle = th.sunGlow;
     ctx.beginPath();
-    ctx.arc(viewW * th.sunX - cam.x * 0.02, th.sunY, 44, 0, Math.PI * 2);
+    ctx.arc(sx, th.sunY, 92, 0, Math.PI * 2);
     ctx.fill();
-    ctx.stroke();
+    ctx.fillStyle = th.sun;
+    ctx.beginPath();
+    ctx.arc(sx, th.sunY, 44, 0, Math.PI * 2);
+    ctx.fill();
 
     // Wolken ziehen langsam vorbei
-    ctx.fillStyle = th.cloud;
-    ctx.strokeStyle = 'rgba(0,0,0,.55)';
-    ctx.lineWidth = 3;
     const span = 1920;
-    clouds.forEach(cl => {
+    clouds.forEach((cl, i) => {
       let x = (cl[0] - cam.x * 0.08 - time * 6) % span;
       if (x < -140) x += span;
-      drawCloud(ctx, x, cl[1], cl[2]);
+      drawCloud(ctx, x, cl[1], cl[2], 300 + i, th.cloud);
     });
 
     const yShift = (36 - cam.y);
-    [['bg_hills', 0.18, th.tintFar, 0.15], ['bg_mid_' + th.id, 0.42, th.tintMid, 0.35], ['bg_near', 0.7, th.tintNear, 0.6]].forEach(l => {
-      const img = RR.Assets.layer(l[0], l[2]);
+    [['far', 0.18, th.tintFar, 0.15], ['mid_' + th.id, 0.42, th.tintMid, 0.35], ['near', 0.7, th.tintNear, 0.6]].forEach(l => {
+      const img = RR.Scenery.layer(l[0], l[2]);
       const w = 1920;
       let x = -((cam.x * l[1]) % w);
       const y = yShift * l[3];

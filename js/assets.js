@@ -10,13 +10,9 @@ RR.Assets = (function () {
     seed: [22, 22], gold_runkel: [40, 56], heart: [30, 28], fence: [96, 52], beet_plant: [44, 40], hay: [48, 48],
     barrel: [48, 48]
   };
-  const LAYERS = { bg_hills: [1920, 540], bg_near: [1920, 540], bg_mid_acker: [1920, 540], bg_mid_weide: [1920, 540], bg_mid_hof: [1920, 540] };
   const QUALITY = 2;
-  const LAYER_QUALITY = 1.25;
 
   const store = {};
-  const rawLayers = {};
-  const tinted = {};
 
   function loadImage(src) {
     return new Promise((resolve, reject) => {
@@ -41,9 +37,6 @@ RR.Assets = (function () {
     Object.keys(SVGS).forEach(n => jobs.push(loadImage('assets/svg/' + n + '.svg').then(i => {
       store[n] = bake(i, SVGS[n][0], SVGS[n][1], QUALITY);
     })));
-    Object.keys(LAYERS).forEach(n => jobs.push(loadImage('assets/svg/' + n + '.svg').then(i => {
-      rawLayers[n] = bake(i, LAYERS[n][0], LAYERS[n][1], LAYER_QUALITY);
-    })));
     return Promise.all(jobs);
   }
 
@@ -65,22 +58,6 @@ RR.Assets = (function () {
     }
   }
 
-  // Hintergrundebene mit Tageszeit-Toenung
-  function layer(name, tint) {
-    const key = name + '|' + (tint || '');
-    if (tinted[key]) return tinted[key];
-    const src = rawLayers[name];
-    if (!tint) return (tinted[key] = src);
-    const c = document.createElement('canvas');
-    c.width = src.width;
-    c.height = src.height;
-    const g = c.getContext('2d');
-    g.drawImage(src, 0, 0);
-    g.globalCompositeOperation = 'source-atop';
-    g.fillStyle = tint;
-    g.fillRect(0, 0, c.width, c.height);
-    return (tinted[key] = c);
-  }
 
-  return { load, get, size, draw, layer };
+  return { load, get, size, draw };
 })();
