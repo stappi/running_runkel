@@ -7,6 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Running Runkel</title>
+  <link rel="apple-touch-icon" href="assets/icon.png">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -14,8 +15,9 @@
     <canvas id="game" aria-label="Running Runkel Spielfläche"></canvas>
 
     <div id="topbar" class="hidden">
-      <button id="btn-sound-top" class="round" aria-label="Ton umschalten">♪</button>
-      <button id="btn-pause" class="round" aria-label="Pause">❚❚</button>
+      <button id="btn-full" class="round" type="button" hidden></button>
+      <button id="btn-sound-top" class="round ingame" aria-label="Ton umschalten">♪</button>
+      <button id="btn-pause" class="round ingame" aria-label="Pause">❚❚</button>
     </div>
 
     <div id="touch" class="hidden">
@@ -38,7 +40,9 @@
           <button id="btn-sound" class="secondary">Ton: an</button>
         </div>
         <div id="level-select" class="levels"></div>
+        <p class="goal">Bring die Runkel heil bis zum Zielschild am Ende des Feldes. Samen bringen Punkte für den Bestwert, goldene Runkeln noch viel mehr.</p>
         <p class="help desk">Laufen: ← → oder A D · Springen: Leertaste · Ducken: ↓ oder S · Pause: P · Ton: M</p>
+        <p id="home-hint" class="help hidden">Vollbild auf dem iPhone: Teilen → „Zum Home-Bildschirm“</p>
       </div>
       <p class="powered">powered by Hardinghausener Runkelfest</p>
     </section>

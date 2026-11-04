@@ -19,9 +19,14 @@ python -m http.server 8123
 | Ducken | S oder ↓ | ▼ |
 | Pause | P oder Esc | Pausetaste oben rechts |
 | Ton an/aus | M | Notentaste oben rechts |
+| Vollbild | Taste oben rechts | Taste oben rechts |
+
+Auf Android hält das Vollbild das Querformat fest. Das iPhone kennt kein Vollbild für Webseiten; liegt das Spiel auf einer Webadresse, startet es nach „Teilen → Zum Home-Bildschirm“ von dort ohne Browserleisten.
 
 ## Regeln
 
+- Ziel ist das Zielschild am Ende jedes Feldes. Wer alle drei Level schafft, bringt die Runkel heil nach Hause.
+- Samen bringen je 10 Punkte, goldene Runkeln 200, jedes Herz im Ziel 100. Die Punkte zählen für den Bestwert je Level.
 - Die Runkel hat 3 Herzen. Jede aktivierte Vogelscheuche ist ein Rücksetzpunkt und gibt ein Herz zurück.
 - Knüppel kommen von hinten, ein rotes Warnsymbol am linken Rand zeigt die Flughöhe. Wer trödelt, bekommt mehr davon.
 - Stämme, Kühe und Traktoren sind von oben sicher und von der Seite gefährlich. Wildschweine lassen sich mit einem Sprung auf den Kopf kurz betäuben.

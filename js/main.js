@@ -52,7 +52,9 @@
     app.screen = name;
     SCREENS.forEach(s => $('screen-' + s).classList.toggle('hidden', s !== name));
     const inGame = name === 'play';
-    $('topbar').classList.toggle('hidden', !inGame);
+    // Die Leiste bleibt fuer die Vollbild-Taste sichtbar, Ton und Pause gibt es nur im Spiel.
+    $('topbar').classList.toggle('hidden', name === 'loading');
+    document.querySelectorAll('#topbar .ingame').forEach(b => b.classList.toggle('hidden', !inGame));
     $('touch').classList.toggle('hidden', !inGame || !document.body.classList.contains('touch'));
     RR.Input.releaseAll();
   }
@@ -128,6 +130,67 @@
       RR.Audio.unlock();
       show('play');
     }
+  }
+
+  // --- Vollbild ------------------------------------------------------------
+  // Wie in Runkel Royal: Vollbild ueber die Taste, auf Android danach im Querformat festgehalten.
+  const ICON_EXPAND = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9V3h6M15 3h6v6M21 15v6h-6M9 21H3v-6"/></svg>';
+  const ICON_SHRINK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v6H3M21 9h-6V3M15 21v-6h6M3 15h6v6"/></svg>';
+  const fullscreenElement = () => document.fullscreenElement || document.webkitFullscreenElement || null;
+  const fullscreenEnabled = () => !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+
+  // Vom Home-Bildschirm gestartet laeuft das Spiel schon ohne Browserleisten.
+  function standalone() {
+    return navigator.standalone === true ||
+      (window.matchMedia && matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches);
+  }
+
+  // Das iPhone kann Webseiten nicht ins Vollbild bringen; dort hilft der Weg ueber den Home-Bildschirm.
+  function needsHomeScreen() {
+    const ios = /iPhone|iPod|iPad/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    return ios && !fullscreenEnabled() && !standalone();
+  }
+
+  function toggleFullscreen() {
+    if (fullscreenElement()) {
+      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      return;
+    }
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    // Direkt im Klick anfragen, sonst werten manche Browser es nicht mehr als Nutzeraktion.
+    let done;
+    try { done = req.call(el, { navigationUI: 'hide' }); } catch (e) { return; }
+    Promise.resolve(done)
+      .then(() => { if (screen.orientation && screen.orientation.lock) return screen.orientation.lock('landscape'); })
+      .catch(() => { /* Desktop oder iPad: ohne Querformat-Sperre, sonst bleibt der Drehhinweis */ });
+  }
+
+  function setupFullscreen() {
+    if (needsHomeScreen()) $('home-hint').classList.remove('hidden');
+    if (!fullscreenEnabled() || standalone()) return;
+    const b = $('btn-full');
+    b.hidden = false;
+    const refresh = () => {
+      const on = !!fullscreenElement();
+      b.innerHTML = on ? ICON_SHRINK : ICON_EXPAND;
+      b.setAttribute('aria-label', on ? 'Vollbild beenden' : 'Vollbild');
+      b.title = b.getAttribute('aria-label');
+    };
+    b.addEventListener('click', () => { toggleFullscreen(); b.blur(); });
+    document.addEventListener('fullscreenchange', refresh);
+    document.addEventListener('webkitfullscreenchange', refresh);
+    refresh();
+  }
+
+  // Ein Web-App-Manifest laesst das Spiel vom Android-Startbildschirm im Vollbild starten.
+  // Unter file:// wuerde der Browser es ohnehin abweisen.
+  function addManifest() {
+    if (!/^https?:$/.test(location.protocol)) return;
+    const link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = 'manifest.webmanifest';
+    document.head.appendChild(link);
   }
 
   function bindUi() {
@@ -273,6 +336,8 @@
 
   // --- Start ----------------------------------------------------------------
   bindUi();
+  setupFullscreen();
+  addManifest();
   resize();
   requestAnimationFrame(frame);
   RR.Assets.load().then(() => {
